@@ -1,0 +1,35 @@
+{
+    "name": "servicios",
+    "version": "1.0.0",
+    "description": "LPL http server",
+    "main": "server/main.js",
+    "scripts": {
+        "test": "nodemon server/main.js -e js,css,html",
+        "start": "node server/main.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Altitude-Solutions/dictum-http.git"
+    },
+    "author": {
+        "name": "Altitude Solutions",
+        "email": "javier.contreras@altitudesolutions.org"
+    },
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Altitude-Solutions/dictum-http/issues"
+    },
+    "homepage": "https://github.com/Altitude-Solutions/dictum-http#readme",
+    "dependencies": {
+        "bcrypt": "^3.0.6",
+        "body-parser": "^1.19.0",
+        "excel4node": "^1.7.2",
+        "express": "^4.17.1",
+        "express-fileupload": "^1.1.6",
+        "jsonwebtoken": "^8.5.1",
+        "mariadb": "^2.1.4",
+        "sequelize": "^5.21.2",
+        "underscore": "^1.9.1",
+        "unzipper": "^0.10.8"
+    }
+}

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Datos LPL</title>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="mt-4 col-12 col-sm-10 col-md-9 col-lg-7 col-xl-5 ml-auto mr-auto" id="content">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+        function getRequest() {
+            try {
+                var request = new XMLHttpRequest();
+            } catch (err) {
+                try {
+                    var request = ActiveXObject('Msxm12.XMLHTTP');
+                } catch (err2) {
+                    try {
+                        var request = ActiveXObject('Microsoft.EXMLHTTP');
+                    } catch (err3) {
+                        var request = false;
+                    }
+                }
+            }
+            return request;
+        }
+
+        let html = '';
+
+        let token;
+        if (!sessionStorage.getItem('token')) {
+            html += '<h3>Iniciar sesión</h3>';
+            html += '<div class="input-group mb-3">';
+            html += '    <div class="input-group-prepend">';
+            html += '        <label style="width: 160px;" class="input-group-text" for="userName">Nombre de usuario</label>';
+            html += '    </div>';
+            html += '    <input id="userName" type="text" class="form-control" placeholder="Nombre de usuario" aria-label="Nombre de usuario" aria-describedby="basic-addon1">';
+            html += '</div>';
+            html += '<div class="input-group mb-3">';
+            html += '    <div class="input-group-prepend">';
+            html += '        <label style="width: 160px;" class="input-group-text" for="password">Contraseña</label>';
+            html += '    </div>';
+            html += '    <input id="password" type="password" class="form-control" placeholder="Contraseña" aria-label="Contraseña" aria-describedby="basic-addon1">';
+            html += '</div>';
+            html += '<div class="row">'
+            html += '    <button class="btn btn-dark ml-auto mr-3" id="loginButton">Iniciar sesión</button>';
+            html += '</div>';
+
+            $('#content').html(html);
+
+            $('#userName').focus();
+
+            $('#password').keydown((e) => {
+                if (e.key == 'Enter')
+                    $('#loginButton').click();
+            });
+
+            $('#userName').keydown((e) => {
+                if (e.key == 'Enter')
+                    $('#loginButton').click();
+            });
+
+            document.getElementById('loginButton').addEventListener('click', () => {
+                if ($('#userName').val() == '') {
+                    $('#userName').focus();
+                    alert('El nombre de usuario es necesario');
+                    return;
+                }
+                if ($('#password').val() == '') {
+                    $('#password').focus();
+                    alert('La contraseña es necesaria');
+                    return;
+                }
+
+                let loginRequest = getRequest();
+
+                loginRequest.onreadystatechange = () => {
+                    if (loginRequest.readyState == 4) {
+                        if (loginRequest.status == 200) {
+                            let res = JSON.parse(loginRequest.response);
+                            token = res.token;
+                            sessionStorage.setItem('token', token);
+
+                            let loggedHtml = '';
+
+                            loggedHtml += '<h1 style="text-align: center;">Reportes LPL</h1>';
+                            loggedHtml += '<div id="menu">';
+                            loggedHtml += '    <ul>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Operador de Radio</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="horarios.html">Registro de Horarios</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="penalidades.html">Registro de Penalidades</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="datos.html">Registro de Datos</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Operador de Base</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="base.html">Registro de Base</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Estación de Servicio</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="estacion_de_servicio.html">Registro de Estación de Servicio</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
+                            loggedHtml += '    </ul>';
+                            loggedHtml += '</div>';
+
+                            $('#content').html(loggedHtml);
+                        } else {
+                            let res = JSON.parse(loginRequest.response);
+                            alert(res.err.message);
+                        }
+                    }
+                };
+                let body = {
+                    nombreUsuario: $('#userName').val(),
+                    contra: $('#password').val()
+                };
+
+                loginRequest.open('POST', '/login', false);
+                loginRequest.setRequestHeader('Content-Type', 'application/json');
+                loginRequest.send(JSON.stringify(body));
+            });
+        } else {
+            token = sessionStorage.getItem('token');
+
+            html += '<h1 style="text-align: center;">Reportes LPL</h1>';
+            html += '<div id="menu">';
+            html += '    <ul>';
+            html += '        <ul>';
+            html += '            <h2>Operador de Radio</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="horarios.html">Registro de Horarios</a></h3>';
+            html += '            </li>';
+            html += '            <li>';
+            html += '                <h3><a href="penalidades.html">Registro de Penalidades</a></h3>';
+            html += '            </li>';
+            html += '            <li>';
+            html += '                <h3><a href="datos.html">Registro de Datos</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
+            html += '        <ul>';
+            html += '            <h2>Operador de Base</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="base.html">Registro de Base</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
+            html += '        <ul>';
+            html += '            <h2>Estación de Servicio</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="estacion_de_servicio.html">Registro de Estación de Servicio</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
+            html += '    </ul>';
+            html += '</div>';
+
+            $('#content').html(html);
+        }
+    </script>
+
+</body>
+
+</html>
