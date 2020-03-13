@@ -48,22 +48,22 @@ PlanDePagos.init({
         type: DataTypes.STRING
     },
     monto: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     iva: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     cuotaInicial: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     tipoDeTasa: {
         type: DataTypes.STRING
     },
     interesFijo: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     interesVariable: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     plazo: {
         type: DataTypes.INTEGER
@@ -78,31 +78,31 @@ PlanDePagos.init({
         type: DataTypes.BIGINT
     },
     montoDesembolso_1: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     fechaDesembolso_2: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_2: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     fechaDesembolso_3: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_3: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     fechaDesembolso_4: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_4: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     fechaDesembolso_5: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_5: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
@@ -146,16 +146,16 @@ CuotaPlanDePagos.init({
         type: DataTypes.BIGINT
     },
     montoTotalDelPago: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeCapital: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeInteres: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeIva: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
@@ -191,16 +191,16 @@ CuotaEfectiva.init({
         type: DataTypes.BIGINT
     },
     montoTotalDelPago: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeCapital: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeInteres: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     pagoDeIva: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     estado: {
         type: DataTypes.BOOLEAN,

@@ -30,7 +30,7 @@ app.post('/planDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('fin_escribir')) {
-        if (body.numeroDeContratoOperacion && body.monto && body.fechaFirma && body.moneda && body.plazo && body.frecuenciaDePagos && body.empresaGrupo && body.entidadFinanciera) {
+        if (body.numeroDeContratoOperacion != undefined && body.monto != undefined && body.numeroDeContratoOperacion != undefined && body.fechaFirma != undefined) {
             if (body.lineaDeCredito) {
                 LineasDeCredito.findByPk(body.lineaDeCredito)
                     .then(lineaDB => {
@@ -104,7 +104,7 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                     });
             }
         } else {
-            if (!body.numeroDeContratoOperacion) {
+            if (!body.numeroDeContratoOperacion != undefined) {
                 res.status(400).json({
                     err: {
                         message: 'El número de contrato u operación es necesario'
@@ -212,7 +212,7 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
                 if (!planDePagos) {
                     return res.status(404).json({
                         err: {
-                            message: 'Plan de pagos no encontrado'
+                            message: 'Operación no encontrada'
                         }
                     });
                 }
@@ -221,7 +221,10 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
                     where: {
                         parent: planDePagos.id,
                         estado: true
-                    }
+                    },
+                    order: [
+                        ['numeroDeCuota', 'ASC']
+                    ]
                 })
                     .then(cuotasDB => {
                         let cuotas = [];
@@ -234,7 +237,10 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
                             where: {
                                 parent: planDePagos.id,
                                 estado: true
-                            }
+                            },
+                            order: [
+                                ['numeroDeCuota', 'ASC']
+                            ]
                         })
                             .then(cuotasEfecDB => {
                                 let cuotas_efe = [];
@@ -273,6 +279,132 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
     }
 });
 
+app.put('/planDePagos/:id',  verifyToken, (req,res)=>{
+    let body = req.body;
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_escribir')) {
+        if (body.numeroDeContratoOperacion != undefined && body.monto != undefined && body.numeroDeContratoOperacion != undefined && body.fechaFirma != undefined) {
+            PlanDePagos.findByPk(id)
+            .then(plannedDB => {
+                if(plannedDB!=undefined) {
+                    if (body.lineaDeCredito) {
+                        LineasDeCredito.findByPk(body.lineaDeCredito)
+                            .then(lineaDB => {
+                                PlanDePagos.findAll({
+                                    where: {
+                                        lineaDeCredito: body.lineaDeCredito,
+                                        estado: true
+                                    }
+                                })
+                                    .then(operaciones => {
+                                        let lineaDeCredito_creditLimit = lineaDB.toJSON().monto;
+                                        operaciones.forEach(element => {
+                                            let op_aux = element.toJSON();
+                                            lineaDeCredito_creditLimit -= op_aux.monto;
+                                        });
+                                        if (lineaDeCredito_creditLimit >= body.monto) {
+                                            if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
+                                                if (body.fechaFirma >= lineaDB.fechaFirma) {
+                                                    PlanDePagos.update(body, {
+                                                        where: {
+                                                            id
+                                                        }
+                                                    })
+                                                        .then(saved => {
+                                                            res.json({
+                                                                planDePagos: saved
+                                                            });
+                                                        }).catch(err => {
+                                                            res.status(500).json({
+                                                                err
+                                                            });
+                                                        });
+                                                } else {
+                                                    return res.status(400).json({
+                                                        err: {
+                                                            message: `La fecha de firma de la operación es anterior que la fecha de creación de la línea de crédito\nFecha de firma: ${new Date(lineaDB.fechaFirma).getDate()}/${new Date(lineaDB.fechaFirma).getMonth() + 1}/${new Date(lineaDB.fechaFirma).getFullYear()}`
+                                                        }
+                                                    });
+                                                }
+                                            } else {
+                                                return res.status(400).json({
+                                                    err: {
+                                                        message: `La fecha de vencimiento de la línea de crédito es anterior que la finalización operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth() + 1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            return res.status(400).json({
+                                                err: {
+                                                    message: `El saldo de la línea de crédito es insuficiente para sustentar esta operación\nSaldo: ${lineaDeCredito_creditLimit} ${lineaDB.moneda}`
+                                                }
+                                            });
+                                        }
+                                    }).catch(err => {
+                                        return res.status(500).json({
+                                            err
+                                        });
+                                    });
+                            })
+                            .catch(err => {
+                                return res.status(500).json({
+                                    err
+                                });
+                            });
+                    } else {
+                        PlanDePagos.update(body, {
+                            where: {
+                                id
+                            }
+                        })
+                            .then(saved => {
+                                res.json({
+                                    planDePagos: saved
+                                });
+                            }).catch(err => {
+                                res.status(500).json({
+                                    err
+                                });
+                            });
+                    }
+                }else{
+                    return res.status(404).json({
+                        err: {
+                            message: 'Operación no encontrada'
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            if (!body.numeroDeContratoOperacion != undefined) {
+                res.status(400).json({
+                    err: {
+                        message: 'El número de contrato u operación es necesario'
+                    }
+                });
+            } else {
+                res.status(400).json({
+                    err: {
+                        message: 'El número de contrato u operación, el monto, la moneda, la fecha de firma, el plazo, la frecuencia de pagos, la entidad financiera y la empresa son necesarios'
+                    }
+                });
+            }
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
 
 app.delete('/planDePagos/:id', verifyToken, (req, res) => {
     let user = req.user;
@@ -320,12 +452,11 @@ app.delete('/planDePagos/:id', verifyToken, (req, res) => {
     }
 });
 
-
 app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('fin_escribir')) {
-        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
+        if (body.numeroDeCuota != undefined && body.fechaDePago != undefined && body.montoTotalDelPago != undefined && body.parent != undefined) {
             CuotaPlanDePagos.findAll({
                 where: {
                     parent: Number(body.parent),
@@ -388,12 +519,92 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     }
 });
 
+app.put('/cuotaPlanDePagos/:id', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_modificar')) {
+        if (body.numeroDeCuota != undefined && body.fechaDePago != undefined && body.montoTotalDelPago != undefined && body.parent != undefined) {
+            CuotaPlanDePagos.findByPk(id)
+            .then(planDue_DB => {
+                if(planDue_DB){
+                    CuotaPlanDePagos.update(body, {
+                        where: {
+                            id
+                        }
+                    }).then(affected => {
+                            res.json({
+                                affected
+                            });
+                        }).catch(err => {
+                            res.status(500).json({
+                                err
+                            });
+                        });
+                }else{
+                    return res.status(404).json({
+                        err: {
+                            message: 'Cuota no encontrada'
+                        }
+                    })
+                }
+            })
+            .catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El plan de pagos asociado, el número de cuota, la fecha del pago y el monto son necesarios'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+app.delete('/cuotaPlanDePagos/:id', verifyToken, (req, res) => {
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_modificar')) {
+            CuotaPlanDePagos.update({
+                estado: false
+            }, {
+                where: {
+                    id
+                }
+            }).then(affected => {
+                    res.json({
+                        affected
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
 
 app.post('/cuotaEfectiva', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('fin_escribir')) {
-        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
+        if (body.numeroDeCuota != undefined && body.fechaDePago != undefined && body.montoTotalDelPago != undefined && body.parent != undefined) {
             CuotaEfectiva.create(body)
                 .then(saved => {
                     res.json({
@@ -426,7 +637,7 @@ app.put('/cuotaEfectiva/:id', verifyToken, (req, res) => {
     let id = Number(req.params.id);
 
     if (user.permisos.includes('fin_modificar')) {
-        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
+        if (body.numeroDeCuota != undefined && body.fechaDePago != undefined && body.montoTotalDelPago != undefined && body.parent != undefined) {
             CuotaEfectiva.update(body, {
                 where: {
                     id

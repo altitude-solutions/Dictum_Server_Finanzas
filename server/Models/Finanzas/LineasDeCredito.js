@@ -42,7 +42,7 @@ LineasDeCredito.init({
         type: DataTypes.BIGINT
     },
     monto: {
-        type: DataTypes.FLOAT
+        type: DataTypes.DECIMAL(23,2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
