@@ -46,9 +46,9 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                     let op_aux = element.toJSON();
                                     lineaDeCredito_creditLimit -= op_aux.monto;
                                 });
-                                if (lineaDeCredito_creditLimit >= body.monto) {
+                                if (Math.abs(lineaDeCredito_creditLimit - body.monto) >= 1e-2) {
                                     if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
-                                        if(body.fechaFirma >= lineaDB.fechaFirma) {
+                                        if (body.fechaFirma >= lineaDB.fechaFirma) {
                                             PlanDePagos.create(body)
                                                 .then(saved => {
                                                     res.json({
@@ -473,7 +473,7 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
                     PlanDePagos.findByPk(body.parent)
                         .then(thisParent => {
                             let diff = thisParent.toJSON().monto - thisPlanCuotas_Spend;
-                            if(body.pagoDeCapital <= diff) {
+                            if (1e-2 <= Math.abs(diff - body.pagoDeCapital)) {
                                 CuotaPlanDePagos.create(body)
                                     .then(saved => {
                                         res.json({
