@@ -29,6 +29,7 @@ const { PlanDePagos, CuotaPlanDePagos, CuotaEfectiva } = require('../Models/Fina
 app.post('/planDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
+
     if (user.permisos.includes('fin_escribir')) {
         if (body.numeroDeContratoOperacion != undefined && body.monto != undefined && body.numeroDeContratoOperacion != undefined && body.fechaFirma != undefined) {
             if (body.lineaDeCredito) {
@@ -46,7 +47,8 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                     let op_aux = element.toJSON();
                                     lineaDeCredito_creditLimit -= op_aux.monto;
                                 });
-                                if (Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2) {
+
+                                if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
                                     if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
                                         if (body.fechaFirma >= lineaDB.fechaFirma) {
                                             PlanDePagos.create(body)
@@ -304,7 +306,7 @@ app.put('/planDePagos/:id', verifyToken, (req, res) => {
                                                 let op_aux = element.toJSON();
                                                 lineaDeCredito_creditLimit -= op_aux.monto;
                                             });
-                                            if (Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2) {
+                                            if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
                                                 if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
                                                     if (body.fechaFirma >= lineaDB.fechaFirma) {
                                                         PlanDePagos.update(body, {
@@ -455,6 +457,7 @@ app.delete('/planDePagos/:id', verifyToken, (req, res) => {
 app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
+    
     if (user.permisos.includes('fin_escribir')) {
         if (body.numeroDeCuota != undefined && body.fechaDePago != undefined && body.montoTotalDelPago != undefined && body.parent != undefined) {
             CuotaPlanDePagos.findAll({
@@ -473,7 +476,8 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
                     PlanDePagos.findByPk(body.parent)
                         .then(thisParent => {
                             let diff = thisParent.toJSON().monto - thisPlanCuotas_Spend;
-                            if (1e-2 >= Math.abs(diff - body.pagoDeCapital)) {
+
+                            if (diff >= body.pagoDeCapital || (diff < body.pagoDeCapital && 1e-2 >= Math.abs(diff - body.pagoDeCapital))) {
                                 CuotaPlanDePagos.create(body)
                                     .then(saved => {
                                         res.json({
