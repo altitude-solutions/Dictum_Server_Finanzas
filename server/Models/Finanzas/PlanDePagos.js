@@ -21,7 +21,7 @@ const { LineasDeCredito } = require('./LineasDeCredito');
 // ===============================================
 // Plan de pagos model
 // ===============================================
-class PlanDePagos extends Model {};
+class PlanDePagos extends Model { };
 PlanDePagos.init({
     id: {
         type: DataTypes.INTEGER,
@@ -48,22 +48,25 @@ PlanDePagos.init({
         type: DataTypes.STRING
     },
     monto: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     iva: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     cuotaInicial: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
+    },
+    garantia: {
+        type: DataTypes.DECIMAL(23, 2)
     },
     tipoDeTasa: {
         type: DataTypes.STRING
     },
     interesFijo: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     interesVariable: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     plazo: {
         type: DataTypes.INTEGER
@@ -78,31 +81,37 @@ PlanDePagos.init({
         type: DataTypes.BIGINT
     },
     montoDesembolso_1: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     fechaDesembolso_2: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_2: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     fechaDesembolso_3: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_3: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     fechaDesembolso_4: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_4: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     fechaDesembolso_5: {
         type: DataTypes.BIGINT
     },
     montoDesembolso_5: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
+    },
+    fechaDesembolso_6: {
+        type: DataTypes.BIGINT
+    },
+    montoDesembolso_6: {
+        type: DataTypes.DECIMAL(23, 2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
@@ -131,7 +140,7 @@ PlanDePagos.belongsTo(EntidadFinanciera, {
 // ===============================================
 // Cuota plan de pagos model
 // ===============================================
-class CuotaPlanDePagos extends Model {};
+class CuotaPlanDePagos extends Model { };
 CuotaPlanDePagos.init({
     id: {
         type: DataTypes.INTEGER,
@@ -146,16 +155,16 @@ CuotaPlanDePagos.init({
         type: DataTypes.BIGINT
     },
     montoTotalDelPago: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeCapital: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeInteres: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeIva: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
@@ -176,7 +185,7 @@ CuotaPlanDePagos.belongsTo(PlanDePagos, {
 // ===============================================
 // Cuota efectiva model
 // ===============================================
-class CuotaEfectiva extends Model {};
+class CuotaEfectiva extends Model { };
 CuotaEfectiva.init({
     id: {
         type: DataTypes.INTEGER,
@@ -191,16 +200,16 @@ CuotaEfectiva.init({
         type: DataTypes.BIGINT
     },
     montoTotalDelPago: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeCapital: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeInteres: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     pagoDeIva: {
-        type: DataTypes.DECIMAL(23,2)
+        type: DataTypes.DECIMAL(23, 2)
     },
     estado: {
         type: DataTypes.BOOLEAN,
