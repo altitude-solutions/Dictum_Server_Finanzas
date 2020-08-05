@@ -49,7 +49,8 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                 });
 
                                 if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
-                                    if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
+                                    // if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
+                                    if (lineaDB.fechaVencimiento >= body.fechaFirma) {
                                         if (body.fechaFirma >= lineaDB.fechaFirma) {
                                             PlanDePagos.create(body)
                                                 .then(saved => {
@@ -71,7 +72,7 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                     } else {
                                         return res.status(400).json({
                                             err: {
-                                                message: `La fecha de vencimiento de la línea de crédito es anterior que la finalización operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth() + 1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
+                                                message: `La fecha de vencimiento de la línea de crédito es anterior al inicio de la operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth() + 1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
                                             }
                                         });
                                     }
