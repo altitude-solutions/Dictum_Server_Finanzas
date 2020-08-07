@@ -326,7 +326,9 @@ app.put('/planDePagos/:id', verifyToken, (req, res) => {
                                             let lineaDeCredito_creditLimit = lineaDB.toJSON().monto;
                                             operaciones.forEach(element => {
                                                 let op_aux = element.toJSON();
-                                                lineaDeCredito_creditLimit -= op_aux.monto;
+                                                if(id != op_aux.id) {
+                                                    lineaDeCredito_creditLimit -= op_aux.monto;
+                                                }
                                             });
                                             if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
                                                 if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
