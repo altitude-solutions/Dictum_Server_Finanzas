@@ -39,56 +39,76 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                             where: {
                                 lineaDeCredito: body.lineaDeCredito,
                                 estado: true
-                            },
-                            include: [{
-                                model: CuotaEfectiva
-                            }]
+                            }
                         })
                             .then(operaciones => {
                                 let lineaDeCredito_creditLimit = lineaDB.toJSON().monto;
-                                let Kamortizado = 0;
+                                let op_ids = [];
                                 operaciones.forEach(element => {
                                     let op_aux = element.toJSON();
                                     lineaDeCredito_creditLimit -= op_aux.monto;
+                                    op_ids.push(op_aux.id);
                                 });
 
-                                console.log(operaciones[i].toJSON());
+                                console.log(op_ids);
+                                console.log(`limit = ${lineaDeCredito_creditLimit}`);
 
-                                if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
-                                    // if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
-                                    if (lineaDB.fechaVencimiento >= body.fechaFirma) {
-                                        if (body.fechaFirma >= lineaDB.fechaFirma) {
-                                            PlanDePagos.create(body)
-                                                .then(saved => {
-                                                    res.json({
-                                                        planDePagos: saved
+                                CuotaEfectiva.findAll({
+                                    where: {
+                                        parent: op_ids,
+                                        estado: true
+                                    }
+                                })
+                                .then(cuotas_K_amortizado => {
+
+                                    cuotas_K_amortizado.forEach(k_amortizado => {
+                                        let cuota_aux = k_amortizado.toJSON();
+                                        lineaDeCredito_creditLimit += cuota_aux.pagoDeCapital;
+                                    });
+
+                                    console.log(`limit = ${lineaDeCredito_creditLimit}`);
+
+                                    if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
+                                        // if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
+                                        if (lineaDB.fechaVencimiento >= body.fechaFirma) {
+                                            if (body.fechaFirma >= lineaDB.fechaFirma) {
+                                                PlanDePagos.create(body)
+                                                    .then(saved => {
+                                                        res.json({
+                                                            planDePagos: saved
+                                                        });
+                                                    }).catch(err => {
+                                                        res.status(500).json({
+                                                            err
+                                                        });
                                                     });
-                                                }).catch(err => {
-                                                    res.status(500).json({
-                                                        err
-                                                    });
+                                            } else {
+                                                return res.status(400).json({
+                                                    err: {
+                                                        message: `La fecha de firma de la operación es anterior que la fecha de creación de la línea de crédito\nFecha de firma: ${new Date(lineaDB.fechaFirma).getDate()}/${new Date(lineaDB.fechaFirma).getMonth() + 1}/${new Date(lineaDB.fechaFirma).getFullYear()}`
+                                                    }
                                                 });
+                                            }
                                         } else {
                                             return res.status(400).json({
                                                 err: {
-                                                    message: `La fecha de firma de la operación es anterior que la fecha de creación de la línea de crédito\nFecha de firma: ${new Date(lineaDB.fechaFirma).getDate()}/${new Date(lineaDB.fechaFirma).getMonth() + 1}/${new Date(lineaDB.fechaFirma).getFullYear()}`
+                                                    message: `La fecha de vencimiento de la línea de crédito es anterior al inicio de la operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth() + 1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
                                                 }
                                             });
                                         }
                                     } else {
                                         return res.status(400).json({
                                             err: {
-                                                message: `La fecha de vencimiento de la línea de crédito es anterior al inicio de la operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth() + 1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
+                                                message: `El saldo de la línea de crédito es insuficiente para sustentar esta operación\nSaldo: ${lineaDeCredito_creditLimit} ${lineaDB.moneda}`
                                             }
                                         });
                                     }
-                                } else {
-                                    return res.status(400).json({
-                                        err: {
-                                            message: `El saldo de la línea de crédito es insuficiente para sustentar esta operación\nSaldo: ${lineaDeCredito_creditLimit} ${lineaDB.moneda}`
-                                        }
+                                })
+                                .catch(err => {
+                                    return res.status(500).json({
+                                        err
                                     });
-                                }
+                                });
                             }).catch(err => {
                                 return res.status(500).json({
                                     err
