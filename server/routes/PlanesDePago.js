@@ -49,10 +49,7 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                     lineaDeCredito_creditLimit -= op_aux.monto;
                                     op_ids.push(op_aux.id);
                                 });
-
-                                console.log(op_ids);
-                                console.log(`limit = ${lineaDeCredito_creditLimit}`);
-
+                                // console.log(`limit = ${lineaDeCredito_creditLimit}`);
                                 CuotaEfectiva.findAll({
                                     where: {
                                         parent: op_ids,
@@ -65,9 +62,7 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                                         let cuota_aux = k_amortizado.toJSON();
                                         lineaDeCredito_creditLimit += cuota_aux.pagoDeCapital;
                                     });
-
-                                    console.log(`limit = ${lineaDeCredito_creditLimit}`);
-
+                                    // console.log(`limit = ${lineaDeCredito_creditLimit}`);
                                     if (lineaDeCredito_creditLimit >= body.monto || (lineaDeCredito_creditLimit < body.monto && Math.abs(lineaDeCredito_creditLimit - body.monto) <= 1e-2)) {
                                         // if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
                                         if (lineaDB.fechaVencimiento >= body.fechaFirma) {
