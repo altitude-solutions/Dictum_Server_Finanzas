@@ -21,7 +21,7 @@
     },
     "homepage": "https://github.com/Altitude-Solutions/dictum-http#readme",
     "dependencies": {
-        "bcrypt": "^3.0.6",
+        "bcrypt": "^5.0.0",
         "body-parser": "^1.19.0",
         "excel4node": "^1.7.2",
         "express": "^4.17.1",
