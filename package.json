@@ -22,9 +22,9 @@
     "homepage": "https://github.com/Altitude-Solutions/dictum-http#readme",
     "dependencies": {
         "bcrypt": "^3.0.6",
-        "body-parser": "^1.19.0",
+        "body-parser": "^1.20.1",
         "excel4node": "^1.7.2",
-        "express": "^4.17.1",
+        "express": "^4.18.2",
         "express-fileupload": "^1.1.6",
         "jsonwebtoken": "^8.5.1",
         "mariadb": "^2.1.4",
